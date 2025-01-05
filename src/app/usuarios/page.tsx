@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
+  Typography, 
   Table, 
   TableBody, 
   TableCell, 
@@ -22,7 +23,8 @@ import {
   FormControl,
   InputLabel,
   Box,
-  Grid
+  Grid,
+  Chip
 } from '@mui/material'
 import { useSnackbar } from 'notistack'
 import { Spinner } from '@/components/Spinner'
@@ -468,53 +470,143 @@ export default function UsuariosPage() {
 
   // Renderização da tabela de usuários
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Gerenciamento de Usuários</h1>
-      
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Nome</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Função</TableCell>
-              <TableCell>Data de Criação</TableCell>
-              <TableCell>Ações</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Array.isArray(users) && users.length > 0 ? (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <Button 
-                      variant="outlined" 
-                      color="primary" 
-                      onClick={() => handleEditUser(user)}
-                    >
-                      Editar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
+    <Box 
+      sx={{
+        backgroundColor: 'background.default',
+        minHeight: '100vh',
+        py: 4,
+        px: { xs: 2, md: 6 }
+      }}
+    >
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          borderRadius: 3, 
+          overflow: 'hidden',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+        }}
+      >
+        <Box 
+          sx={{ 
+            backgroundColor: 'primary.main', 
+            color: 'white', 
+            p: 3,
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center' 
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold">
+            Gerenciamento de Usuários
+          </Typography>
+          <Button 
+            variant="contained" 
+            color="secondary"
+            sx={{ 
+              borderRadius: 2,
+              textTransform: 'none'
+            }}
+          >
+            Adicionar Usuário
+          </Button>
+        </Box>
+
+        <TableContainer>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead sx={{ backgroundColor: 'grey.100' }}>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  Nenhum usuário encontrado
+                <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Nome</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Função</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Data de Criação</TableCell>
+                <TableCell 
+                  align="right" 
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    color: 'text.secondary',
+                    pr: 3 
+                  }}
+                >
+                  Ações
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {users.length > 0 ? (
+                users.map((user) => (
+                  <TableRow 
+                    key={user.id}
+                    hover
+                    sx={{ 
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      transition: 'background-color 0.2s',
+                      '&:hover': { 
+                        backgroundColor: 'action.hover' 
+                      }
+                    }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {user.name}
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={user.role} 
+                        color={
+                          user.role === 'admin' ? 'error' : 
+                          user.role === 'tecnico' ? 'primary' : 
+                          'default'
+                        } 
+                        size="small" 
+                        sx={{ 
+                          fontWeight: 'bold',
+                          borderRadius: 1 
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {new Date(user.createdAt).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button 
+                          variant="outlined" 
+                          color="primary" 
+                          size="small"
+                          sx={{ 
+                            borderRadius: 2,
+                            textTransform: 'none'
+                          }}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setOpenDialog(true);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      Nenhum usuário encontrado
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
       <EditUserModal />
-    </div>
+    </Box>
   )
 }
