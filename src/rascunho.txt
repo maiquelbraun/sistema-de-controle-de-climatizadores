@@ -1,0 +1,27 @@
+maiquel.braun@gmail.com e a senha Sup3rs3gur@
+
+
+Pacotes instalados com sucesso!
+
+Próximos passos sugeridos:
+
+Configurar variáveis de ambiente para envio de email
+Testar o envio de email de recuperação de senha
+Gostaria que eu continue configurando as variáveis
+ de ambiente para envio de email? Precisarei de 
+ algumas informações:
+
+Servidor de email (SMTP)
+Usuário de email
+Senha de email
+Porta do servidor
+Email de origem
+Pode me fornecer esses detalhes ou prefere que eu use
+ um serviço de email transacional como SendGrid ou 
+ Mailgun?
+
+
+
+ Testar todas as funcionalidades
+Adicionar mais opções de filtro, se necessário
+Melhorar a responsividade

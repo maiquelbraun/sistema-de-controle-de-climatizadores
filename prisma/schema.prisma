@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Climatizador {
+  id                Int          @id @default(autoincrement())
+  modelo           String
+  marca            String
+  localizacao      String
+  dataInstalacao   DateTime?    @map("data_instalacao")
+  ultimaManutencao DateTime?    @map("ultima_manutencao")
+  proximaManutencao DateTime?   @map("proxima_manutencao")
+  status           String       @default("Ativo")
+  numeroSerie      String?      @map("numero_serie")
+  manutencoes      Manutencao[]
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  @@map("climatizadores")
+}
+
+model Manutencao {
+  id               Int         @id @default(autoincrement())
+  climatizadorId   Int         @map("climatizador_id")
+  climatizador     Climatizador @relation(fields: [climatizadorId], references: [id], onDelete: Cascade)
+  dataManutencao   DateTime    @map("data_manutencao")
+  tipo             String
+  descricao        String
+  tecnico          String
+  custo            Float
+  userId           String?     @map("user_id")
+  user             User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  @@map("manutencoes")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String
+  role          String    @default("OPERATOR")
+  manutencoes   Manutencao[]
+  accounts      Account[]
+  activityLogs  UserActivityLog[]
+  passwordResetTokens PasswordResetToken[]
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model UserActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action      String
+  description String
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@map("user_activity_logs")
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model SecuritySettings {
+  id                     String   @id @default(cuid())
+  maxLoginAttempts       Int      @default(5)
+  lockoutDuration        Int      @default(15)  // minutos
+  passwordMinLength      Int      @default(8)
+  requireSpecialChar     Boolean  @default(true)
+  requireUppercase       Boolean  @default(true)
+  requireNumber          Boolean  @default(true)
+  enableTwoFactorAuth    Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("security_settings")
+}
+
+model LoginAttempt {
+  id            String   @id @default(cuid())
+  userId        String?
+  email         String
+  ipAddress     String
+  success       Boolean
+  timestamp     DateTime @default(now())
+
+  @@map("login_attempts")
+  @@index([email])
+  @@index([timestamp])
+}
